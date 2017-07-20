@@ -1,10 +1,13 @@
 const path = require('path');
 
 module.exports = {
-    entry: './canvas.ts',
+    entry: {
+        // bundle: './canvas.ts',
+        development: './development.ts',
+    },
     output: {
         path: path.resolve(__dirname, 'dist'),
-        filename: 'bundle.js'
+        filename: '[name].js',
     },
     resolve: {
         // Add `.ts` and `.tsx` as a resolvable extension.
