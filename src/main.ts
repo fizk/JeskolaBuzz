@@ -3,18 +3,18 @@ import Text from './elements/Text';
 import Node from './elements/Node';
 import Button from './elements/Button';
 import {Event} from './types/Event';
-import Application from "./elements/Application";
-import Bar from "./elements/Bar";
+import Application from "./components/Application";
+import Bar from "./components/Bar";
 import Divider from "./elements/Divider";
-import Footer from "./elements/Footer";
-import MachineEditor from "./elements/MachineEditor";
+import Footer from "./components/Footer";
+import MachineEditor from "../screens/MachineEditor";
 import {State} from "./types/State";
 import {ModuleType} from "./types/ModuleType";
 import {View} from "./types/View";
 import checkEvents from './util/checkEvents';
 import checkKey from './util/checkKey';
-import PatternEditor from "./elements/PatternEditor";
-import SequenceEditor from "./elements/SequenceEditor";
+import PatternEditor from "../screens/PatternEditor";
+import SequenceEditor from "../screens/SequenceEditor";
 import NoteMap from './types/NoteMap';
 
 

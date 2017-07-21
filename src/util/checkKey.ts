@@ -1,4 +1,4 @@
-import Application from "../elements/Application";
+import Application from "../components/Application";
 import Queue from "./Queue";
 import Node from "../elements/Node";
 import {KeyEvent} from "../types/KeyEvent";

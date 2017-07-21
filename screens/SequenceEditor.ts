@@ -1,13 +1,13 @@
-import Node from './Node';
-import SequenceRow from "./SequenceRow";
-import SequenceColumn from "./SequenceColumn";
-import SequenceColumnCount from "./SequenceColumnCount";
-import {ModuleType} from "../types/ModuleType";
-import {View} from "../types/View";
-import {KeyEvent} from "../types/KeyEvent";
-import {Module} from "../types/Module";
-import {Pattern} from "../types/Pattern";
-import {Point} from "../types/Point";
+import Node from '../src/elements/Node';
+import SequenceRow from "../src/elements/SequenceRow";
+import SequenceColumn from "../src/elements/SequenceColumn";
+import SequenceColumnCount from "../src/elements/SequenceColumnCount";
+import {ModuleType} from "../src/types/ModuleType";
+import {View} from "../src/types/View";
+import {KeyEvent} from "../src/types/KeyEvent";
+import {Module} from "../src/types/Module";
+import {Pattern} from "../src/types/Pattern";
+import {Point} from "../src/types/Point";
 
 export default class SequenceEditor extends Node {
 

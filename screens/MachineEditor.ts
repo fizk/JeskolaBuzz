@@ -1,13 +1,13 @@
-import Node from './Node';
-import Window from '../elements/Window';
-import Header from '../elements/Header'
-import Slider from '../elements/Slider';
-import {Event} from "../types/Event";
-import {Point} from "../types/Point";
-import {Module} from "../types/Module";
-import MenuItem from './MenuItem';
-import Divider from "./Divider";
-import {ModuleType} from '../types/ModuleType';
+import Node from '../src/elements/Node';
+import Window from '../src/components/Window';
+import Header from '../src/components/Header'
+import Slider from '../src/components/Slider';
+import {Event} from "../src/types/Event";
+import {Point} from "../src/types/Point";
+import {Module} from "../src/types/Module";
+import MenuItem from '../src/elements/MenuItem';
+import Divider from "../src/elements/Divider";
+import {ModuleType} from '../src/types/ModuleType';
 
 
 export default class MachineEditor extends Node {

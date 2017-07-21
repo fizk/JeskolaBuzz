@@ -1,7 +1,7 @@
 import { expect, assert } from 'chai';
 import 'mocha';
-import Block from '../elements/Block';
-import Text from '../elements/Text';
+import Block from '../src/elements/Block';
+import Text from '../src/elements/Text';
 
 describe('Node()', () => {
 
