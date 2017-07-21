@@ -1,4 +1,4 @@
-import Node from './Node';
+import Node from '../elements/Node';
 
 export default class Header extends Node {
     label: string;

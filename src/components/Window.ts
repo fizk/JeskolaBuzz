@@ -1,4 +1,4 @@
-import Node from './Node';
+import Node from '../elements/Node';
 import {Point} from '../types/Point';
 
 export default class Window extends Node {
