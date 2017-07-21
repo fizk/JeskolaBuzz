@@ -7,14 +7,14 @@ import Application from "./components/Application";
 import Bar from "./components/Bar";
 import Divider from "./elements/Divider";
 import Footer from "./components/Footer";
-import MachineEditor from "../screens/MachineEditor";
+import MachineEditor from "./screens/MachineEditor";
 import {State} from "./types/State";
 import {ModuleType} from "./types/ModuleType";
 import {View} from "./types/View";
 import checkEvents from './util/checkEvents';
 import checkKey from './util/checkKey';
-import PatternEditor from "../screens/PatternEditor";
-import SequenceEditor from "../screens/SequenceEditor";
+import PatternEditor from "./screens/PatternEditor";
+import SequenceEditor from "./screens/SequenceEditor";
 import NoteMap from './types/NoteMap';
 
 

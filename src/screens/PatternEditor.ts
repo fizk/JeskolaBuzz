@@ -1,11 +1,11 @@
-import Node from '../src/elements/Node';
-import PatternRow from "../src/elements/PatternRow";
-import PatternColumnCount from "../src/elements/PatternColumnCount";
-import PatternColumn from "../src/elements/PatternColumn";
-import {KeyEvent} from "../src/types/KeyEvent";
-import LetterMap from "../src/types/LetterMap";
-import {View} from "../src/types/View";
-import {Pattern} from "../src/types/Pattern";
+import Node from '../elements/Node';
+import PatternRow from "../elements/PatternRow";
+import PatternColumnCount from "../elements/PatternColumnCount";
+import PatternColumn from "../elements/PatternColumn";
+import {KeyEvent} from "../types/KeyEvent";
+import LetterMap from "../types/LetterMap";
+import {View} from "../types/View";
+import {Pattern} from "../types/Pattern";
 
 export default class PatternEditor extends Node {
 
