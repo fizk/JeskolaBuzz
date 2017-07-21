@@ -1,6 +1,6 @@
-import Element from './Element';
+import Node from './Node';
 
-export default class Bar extends Element {
+export default class Bar extends Node {
     get width() {
         return 200;
     }
@@ -9,46 +9,14 @@ export default class Bar extends Element {
         return 23;
     }
 
-    draw() {
+    draw(x: number = 0, y: number = 0): void {
         this.context.save();
         this.context.fillStyle = '#d4d0c8';
-        this.context.fillRect(0, 0, 200, this.height);
+        this.context.fillRect(0, 0, this.width, this.height);
         this.context.restore();
 
-        //top
-        this.context.save();
-        this.context.strokeStyle = '#ffff';
-        this.context.beginPath();
-        this.context.moveTo(2, 2);
-        this.context.lineTo(2, 19);
-        this.context.stroke();
-        this.context.restore();
+        this.drawBorder({x: 2, y:2, height: this.height-4, width: 3});
 
-        this.context.save();
-        this.context.strokeStyle = '#ffff';
-        this.context.beginPath();
-        this.context.moveTo(2, 2);
-        this.context.lineTo(5, 2);
-        this.context.stroke();
-        this.context.restore();
-
-        //
-        this.context.save();
-        this.context.strokeStyle = '#808080';
-        this.context.beginPath();
-        this.context.moveTo(5, 19);
-        this.context.lineTo(2, 19);
-        this.context.stroke();
-        this.context.restore();
-
-        this.context.save();
-        this.context.strokeStyle = '#808080';
-        this.context.beginPath();
-        this.context.moveTo(5, 19);
-        this.context.lineTo(5, 2);
-        this.context.stroke();
-        this.context.restore();
-
-        super.draw();
+        super.draw(x, y);
     }
 }

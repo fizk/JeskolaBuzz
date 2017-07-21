@@ -1,25 +1,17 @@
-import Element from './Element';
+import Node from './Node';
 
-export default class Divider extends Element {
+export default class Divider extends Node {
 
     get height() {
         return 2;
     }
 
-    set width(width) {
-        this.elementWidth = width;
-    }
-
-    get width() {
-        return this.elementWidth;
-    }
-
-    draw() {
+    draw(x: number = 0, y: number = 0): void {
         this.context.save();
         this.context.strokeStyle = '#808080';
         this.context.beginPath();
         this.context.moveTo(0, 0);
-        this.context.lineTo(this.elementWidth, 0);
+        this.context.lineTo(this.width, 0);
         this.context.stroke();
         this.context.restore();
 
@@ -27,10 +19,10 @@ export default class Divider extends Element {
         this.context.strokeStyle = '#ffff';
         this.context.beginPath();
         this.context.moveTo(0, 1);
-        this.context.lineTo(this.elementWidth, 1);
+        this.context.lineTo(this.width, 1);
         this.context.stroke();
         this.context.restore();
 
-        super.draw();
+        super.draw(x, y);
     }
 }

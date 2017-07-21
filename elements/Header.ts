@@ -1,6 +1,6 @@
-import Element from './Element';
+import Node from './Node';
 
-export default class Header extends Element {
+export default class Header extends Node {
     label: string;
 
     constructor(label: string) {
@@ -16,7 +16,7 @@ export default class Header extends Element {
         return 300;
     }
 
-    draw() {
+    draw(x: number = 0, y: number = 0): void {
         this.context.save();
 
         const grd = this.context.createLinearGradient(0,0,170,0);
@@ -32,6 +32,6 @@ export default class Header extends Element {
 
         this.context.restore();
 
-        super.draw();
+        super.draw(x, y);
     }
 }

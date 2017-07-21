@@ -1,6 +1,7 @@
 {
     "compilerOptions": {
         "sourceMap": false,
-        "target": "es5"
+        "target": "ES6",
+        "typeRoots": ["./node_modules/@types", "./@types"]
     }
 }

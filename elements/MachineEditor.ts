@@ -1,4 +1,4 @@
-import Element from './Element';
+import Node from './Node';
 import Window from '../elements/Window';
 import Header from '../elements/Header'
 import Slider from '../elements/Slider';
@@ -10,8 +10,8 @@ import Divider from "./Divider";
 import {ModuleType} from '../types/ModuleType';
 
 
-export default class MachineEditor extends Element {
-    contextMenu: Element;
+export default class MachineEditor extends Node {
+    contextMenu: Node;
 
     constructor() {
         super();
@@ -44,7 +44,7 @@ export default class MachineEditor extends Element {
         if(this.state.tempConnection.from && this.state.tempConnection.to) {
             this.state.tempConnection.to = {x: event.offsetX, y: event.offsetY};
         } else if (this.state.selectedModule && event.shiftKey === false) {
-            this.state.modules[this.state.selectedModule].position = {x: event.offsetX, y: event.offsetY};
+            this.state.modules.get(this.state.selectedModule).position = {x: event.offsetX, y: event.offsetY};
         }
     }
 
@@ -53,8 +53,8 @@ export default class MachineEditor extends Element {
 
             if (this.state.tempConnection.from && this.state.tempConnection.to) {
                 const key = this.isCollision({x: event.offsetX, y: event.offsetY});
-                if(key) {
-                    this.state.modules[this.state.selectedModule].ref.push(key);
+                if(key && this.state.modules.get(key).type !== ModuleType.GEN) {
+                    this.state.modules.get(this.state.selectedModule).ref.push(key);
                 }
             }
 
@@ -74,12 +74,13 @@ export default class MachineEditor extends Element {
             to: undefined,
         };
         this.state.selectedModule = undefined;
+
     }
 
     isCollision(point: Point) {
         let moduleKey = undefined;
-        Object.keys(this.state.modules).forEach(key => {
-            const position = this.state.modules[key].position;
+        this.state.modules.forEach((module, key) => {
+            const position = module.position;
             if (
                 (point.x > position.x && point.x < position.x + 100) &&
                 (point.y > position.y && point.y < position.y + 50)
@@ -111,20 +112,20 @@ export default class MachineEditor extends Element {
     }
 
     drawConnections() {
-        Object.keys(this.state.modules).forEach(key => {
-            if (this.state.modules[key].ref.length > 0) {
-                this.state.modules[key].ref.forEach(refKey => {
-                    this.drawConnection(this.state.modules[key].position, this.state.modules[refKey].position);
+        this.state.modules.forEach((module, key) => {
+            if (module.ref.length > 0) {
+                module.ref.forEach(refKey => {
+                    this.drawConnection(module.position, this.state.modules.get(refKey).position);
                 });
             }
         });
     }
 
     drawModules() {
-        Object.keys(this.state.modules).forEach(key => {
+        this.state.modules.forEach((module, key) => {
             this.context.save();
-            this.context.translate(this.state.modules[key].position.x, this.state.modules[key].position.y);
-            this.drawModule(this.state.modules[key].type, this.state.modules[key].label);
+            this.context.translate(module.position.x, module.position.y);
+            this.drawModule(module.type, module.label);
             this.context.restore();
         });
     }
@@ -150,10 +151,13 @@ export default class MachineEditor extends Element {
         this.context.restore();
     };
 
-    draw() {
+    draw(x: number = 0, y: number = 0): void {
         this.context.save();
         this.context.fillStyle = '#dad6c9';
         this.context.fillRect(0, 0, this.width, this.height);
+        this.drawBorder({x: 4, y:4, width: this.width-4, height: this.height-4}, true);
+        this.context.translate(5, 5);
+
         this.drawConnections();
         this.drawTempConnection();
         this.drawModules();
@@ -163,65 +167,82 @@ export default class MachineEditor extends Element {
             contextMenu.absolute = true;
 
             const synthesizerMenuItem = new MenuItem('Synthesizer');
-            // synthesizerMenuItem.addEventListener('mouseup', (event: Event) => {
-            //     this.state.modules[new Date().getTime()] = {
-            //         position: {x: this.state.machineContextMenu.x, y: this.state.machineContextMenu.y},
-            //         type: TYPES.GEN,
-            //         label: 'Another',
-            //         ref: [],
-            //         asdr: {a: 0.1, s:0.2, d:0, r:0}
-            //     };
-            //     this.state.machineContextMenu = undefined;
-            // });
-            contextMenu.addEventListener('mouseup', (event: Event) => {
-                this.state.modules[new Date().getTime()] = {
+            synthesizerMenuItem.addEventListener('mouseup', (event: Event) => {
+
+                const moduleKey: number = Math.floor(Math.random() * 10000);
+                this.state.modules.set(moduleKey, {
+                    key: moduleKey,
                     position: {x: this.state.machineContextMenu.x, y: this.state.machineContextMenu.y},
                     type: ModuleType.GEN,
-                    label: 'Another',
+                    label: 'Bass3',
                     ref: [],
-                    asdr: {a: 0.1, s:0.2, d:0, r:0}
-                };
+                    asdr: {a: 0.03, s:0.8, d:0, r:0}
+                });
+
+
+                const patternKey = (new Date().getTime() * 2);
+
+                this.state.patterns.set(patternKey, {
+                    key: patternKey,
+                    gen: moduleKey,
+                    label: '00',
+                    pattern: [
+                        undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined,
+                        undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined,
+                    ]
+                });
+
+
+                if(this.state.sequence[this.state.sequenceNumber] === undefined) {
+                    this.state.sequence.push([patternKey]);
+                } else {
+                    this.state.sequence[this.state.sequenceNumber].push(patternKey);
+                    // this.state.sequence[Math.floor(Math.random() * this.state.sequence.length-1) + 1 ].push(patternKey)
+                }
+
                 this.state.machineContextMenu = undefined;
             });
 
             const drumMachineMenuItem = new MenuItem('Drum Machine');
             drumMachineMenuItem.addEventListener('mouseup', (event: Event) => {
-                this.state.modules[new Date().getTime()] = {
+                const moduleKey: number = Math.floor(Math.random() * 10000);
+                this.state.modules.set(moduleKey, {
+                    key: moduleKey,
                     position: {x: this.state.machineContextMenu.x, y: this.state.machineContextMenu.y},
                     type: ModuleType.GEN,
-                    label: 'Another',
+                    label: 'Kick',
                     ref: [],
-                    asdr: {a: 0.1, s:0.2, d:0, r:0}
-                };
+                    asdr: {a: 0.03, s:0.8, d:0, r:0}
+                });
                 this.state.machineContextMenu = undefined;
             });
 
             const delayMenuItem = new MenuItem('Delay');
             delayMenuItem.addEventListener('mouseup', (event: Event) => {
-                this.state.modules[new Date().getTime()] = {
-                    position: {x: this.state.machineContextMenu.x, y: this.state.machineContextMenu.y},
-                    type: ModuleType.GEN,
-                    label: 'Another',
-                    ref: [],
-                    asdr: {a: 0.1, s:0.2, d:0, r:0}
-                };
-                this.state.machineContextMenu = undefined;
+                // this.state.modules[new Date().getTime()] = {
+                //     position: {x: this.state.machineContextMenu.x, y: this.state.machineContextMenu.y},
+                //     type: ModuleType.FX,
+                //     label: 'Delay',
+                //     ref: [],
+                //     asdr: {a: 0.1, s:0.2, d:0, r:0}
+                // };
+                // this.state.machineContextMenu = undefined;
             });
 
             const reverbMenuItem = new MenuItem('Reverb');
             reverbMenuItem.addEventListener('mouseup', (event: Event) => {
-                this.state.modules[new Date().getTime()] = {
-                    position: {x: this.state.machineContextMenu.x, y: this.state.machineContextMenu.y},
-                    type: ModuleType.GEN,
-                    label: 'Another',
-                    ref: [],
-                    asdr: {a: 0.1, s:0.2, d:0, r:0}
-                };
-                this.state.machineContextMenu = undefined;
+                // this.state.modules[new Date().getTime()] = {
+                //     position: {x: this.state.machineContextMenu.x, y: this.state.machineContextMenu.y},
+                //     type: ModuleType.FX,
+                //     label: 'Reverb',
+                //     ref: [],
+                //     asdr: {a: 0.1, s:0.2, d:0, r:0}
+                // };
+                // this.state.machineContextMenu = undefined;
             });
 
             const divider = new Divider();
-            divider.width = 300;
+            divider.width = 200;
 
             contextMenu.addChild(synthesizerMenuItem);
             contextMenu.addChild(drumMachineMenuItem);
@@ -238,7 +259,7 @@ export default class MachineEditor extends Element {
             this.contextMenu = contextMenu;
         }
 
-        super.draw();
+        super.draw(x+5, y+5);
 
         this.context.restore();
     }

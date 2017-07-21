@@ -1,33 +1,12 @@
-import NodeElement from '../elements/Element';
-import {ELEMENT_TYPE} from '../types/ElementType';
+import Node from '../elements/Node';
 
-export default class Application extends NodeElement {
-    constructor() {
-        super();
-        this.type = ELEMENT_TYPE.BLOCK
-    }
+export default class Application extends Node {
 
-    set width(width) {
-        this.elementWidth = width;
-    }
-
-    get width() {
-        return this.elementWidth;
-    }
-
-    set height(height) {
-        this.elementHeight = height;
-    }
-
-    get height() {
-        return this.elementHeight;
-    }
-
-    draw() {
+    draw(x: number = 0, y: number = 0): void {
         this.context.save();
         this.context.fillStyle = '#d4d0c8';
         this.context.fillRect(0, 0, this.width, this.height);
-        super.draw();
+        super.draw(x, y);
         this.context.restore();
     }
 }

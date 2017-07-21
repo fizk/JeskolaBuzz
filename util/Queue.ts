@@ -1,7 +1,7 @@
-import Element from '../elements/Element';
+import Node from '../elements/Node';
 
 export default class Queue {
-    items: Element[];
+    items: Node[];
 
     constructor() {
         this.items = [];
