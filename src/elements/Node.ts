@@ -3,6 +3,8 @@ import {Dimension} from "../types/Dimension";
 import {Event} from '../types/Event';
 import {KeyEvent} from '../types/KeyEvent';
 import {Point} from "../types/Point";
+import {COLOR} from "../types/COLOR";
+import {State} from "../types/State";
 
 export default class Node {
     children: Node[] = [];
@@ -20,6 +22,7 @@ export default class Node {
         arrowUp: ((event: KeyEvent) => void)[],
         arrowLeft: ((event: KeyEvent) => void)[],
         arrowRight: ((event: KeyEvent) => void)[],
+        contextmenu: ((event: KeyEvent) => void)[],
         enter: ((event: KeyEvent) => void)[],
         letter: ((event: KeyEvent) => void)[],
         number: ((event: KeyEvent) => void)[],
@@ -31,13 +34,14 @@ export default class Node {
         arrowUp: [],
         arrowLeft: [],
         arrowRight: [],
+        contextmenu: [],
         enter: [],
         letter: [],
         number: []
     };
     honorWidth: boolean = false;
     honorHeight: boolean = false;
-    state: any;
+    state: State;
     absolute: boolean = false;
     position: Point = {x: 0, y: 0};
 
@@ -102,6 +106,22 @@ export default class Node {
         this.children.push(node);
     }
 
+    addChildren(nodes: Node[]) {
+        this.children.concat(this.children, nodes.map(this.addChild.bind(this)));
+    }
+
+    setChild(node: Node) {
+        node.parent = this;
+        this.children = [node];
+    }
+
+    setChildren(nodes: Node[]) {
+        this.children = nodes.map(node => {
+            node.parent = this;
+            return node;
+        });
+    }
+
     addEventListener(type: string, callback: (event: any) => void) {
         this.events[type].push(callback);
     }
@@ -109,7 +129,7 @@ export default class Node {
     drawBorder(dimensions: Dimension, active: boolean = false) {
         this.context.save();
 
-        this.context.strokeStyle = active ? '#808080': '#ffffff';
+        this.context.strokeStyle = active ? COLOR.BORDER_DARK: COLOR.BORDER_LIGHT;
 
         this.context.beginPath();
         this.context.moveTo(dimensions.x, dimensions.y);
@@ -121,7 +141,7 @@ export default class Node {
         this.context.lineTo(dimensions.x, dimensions.height);
         this.context.stroke();
 
-        this.context.strokeStyle = active ? '#ffffff' : '#808080';
+        this.context.strokeStyle = active ? COLOR.BORDER_LIGHT : COLOR.BORDER_DARK;
 
         this.context.beginPath();
         this.context.moveTo(dimensions.width, dimensions.height);
@@ -140,7 +160,7 @@ export default class Node {
         let offsetY = 0;
         let offsetX = 0;
         let lastChild: Node = undefined;
-        this.children.forEach((child: Node) => {
+        this.children.filter((child: Node) => child !== undefined).forEach((child: Node) => {
             this.context.save();
             if (child.absolute) {
                 this.context.translate(child.position.x, child.position.y);

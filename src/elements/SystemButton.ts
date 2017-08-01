@@ -3,9 +3,8 @@ import {NOTE_TYPE} from "../types/NOTE_TYPE";
 import Text from "./Text";
 import {COLOR} from "../types/COLOR";
 
-export default class Button extends Node {
+export default class SystemButton extends Node {
     text: string;
-    active: boolean = false;
 
     constructor(text: string) {
         super();
@@ -24,9 +23,8 @@ export default class Button extends Node {
 
     draw(x: number = 0, y: number = 0): void {
 
-
-
         this.context.save();
+
 
         this.context.save();
         this.context.fillStyle = COLOR.TEXT;
@@ -34,10 +32,6 @@ export default class Button extends Node {
         this.context.font = '11px sans-serif';
         this.context.fillText(this.text, 4, 19);
         this.context.restore();
-
-        if (this.active) {
-            this.drawBorder({x: 2, y: 2, width: this.width-2, height: this.height-6}, true);
-        }
 
         super.draw(x, y);
 

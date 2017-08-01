@@ -4,7 +4,8 @@
   "description": "",
   "main": "application.js",
   "scripts": {
-    "test": "mocha -r ts-node/register tests/**/test.ts"
+    "test": "mocha -r ts-node/register tests/**/*.ts",
+    "test:watch": "mocha -r ts-node/register --recursive --watch tests/**/*.ts"
   },
   "author": "",
   "license": "ISC",
@@ -22,8 +23,11 @@
     "@types/chai": "^4.0.1",
     "@types/mocha": "^2.2.41",
     "chai": "^4.1.0",
+    "eslint": "^4.3.0",
+    "eslint-plugin-typescript": "^0.3.0",
     "mocha": "^3.4.2",
     "ts-node": "^3.2.0",
+    "typescript-eslint-parser": "^4.0.0",
     "typings": "^2.1.1"
   }
 }

@@ -1,0 +1,29 @@
+{
+    "env": {
+        "browser": true,
+        "es6": true,
+        "node": true
+    },
+    "globals": {
+        "define": true,
+        "module": true,
+        "require": true,
+        "describe": true,
+        "it": true
+    },
+    "parserOptions": {
+        "ecmaFeatures": {
+            "experimentalObjectRestSpread": true,
+        },
+        "sourceType": "module"
+    },
+    "extends": "eslint:recommended",
+    "parser": "typescript-eslint-parser",
+    "plugins": [
+        "typescript"
+    ],
+    "rules": {
+        "typescript/rule-name": "error",
+        "typescript/type-annotation-spacing": "error"
+    }
+}

@@ -1,7 +1,6 @@
 import Block from './elements/Block';
 import Text from './elements/Text';
 import Node from './elements/Node';
-import Button from './elements/Button';
 import {Event} from './types/Event';
 import Application from "./components/Application";
 import Bar from "./components/Bar";
@@ -16,6 +15,9 @@ import checkKey from './util/checkKey';
 import PatternEditor from "./screens/PatternEditor";
 import SequenceEditor from "./screens/SequenceEditor";
 import NoteMap from './types/NoteMap';
+import SystemButton from "./elements/SystemButton";
+import ImageButton from "./elements/ImageButton";
+import Queue from "./util/Queue";
 
 
 
@@ -60,7 +62,7 @@ const state: State = {
         from: undefined,
         to: undefined
     },
-    machineContextMenu: undefined,
+    moduleContextMenu: undefined,
     view: View.Machine,
     sequenceNumber: 0,
     patterns: new Map(),
@@ -68,7 +70,8 @@ const state: State = {
     sequenceEditorPosition: {x: 0, y:0},
     patternEditorPosition: {x: 0, y:0},
     pattenEditorGenerator: undefined,
-    pattenEditorPattern: undefined
+    pattenEditorPattern: undefined,
+    contextMenus: new Map(),
 };
 
 
@@ -77,6 +80,8 @@ document.addEventListener('DOMContentLoaded', () => {
     canvas.width = document.body.clientWidth;
     canvas.height = document.body.clientHeight;
     document.body.appendChild(canvas);
+
+    const sprite: HTMLElement = document.getElementById('sprite');
 
     state.modules.set(1, {
         key: 1,
@@ -96,76 +101,71 @@ document.addEventListener('DOMContentLoaded', () => {
         application = new Application();
         application.context = canvas.getContext('2d');
         application.width = document.body.clientWidth;
-
+        //
+        // // Menu Bar
         const applicationHeader = new Block();
         application.addChild(applicationHeader);
-
-        // Menu Bar
+        //
         const menuBar = new Bar();
         applicationHeader.addChild(menuBar);
 
-        const menuBarFileBtn = new Text('File');
+        const menuBarFileBtn = new SystemButton('File');
         menuBar.addChild(menuBarFileBtn);
 
-        const menuBarEditBtn = new Text('Edit');
+        const menuBarEditBtn = new SystemButton('Edit');
         menuBar.addChild(menuBarEditBtn);
 
-        const menuBarViewBtn = new Text('View');
+        const menuBarViewBtn = new SystemButton('View');
         menuBar.addChild(menuBarViewBtn);
 
-        const menuBarHelpBtn = new Text('Help');
+        const menuBarHelpBtn = new SystemButton('Help');
         menuBar.addChild(menuBarHelpBtn);
 
+        //Divider
         const menuBarDivider = new Divider();
         applicationHeader.addChild(menuBarDivider);
-
-
+        //
         // Controls Bar
         const controlsBar = new Bar();
         applicationHeader.addChild(controlsBar);
 
-        const controlsBarPlayButton = new Button('Play');
+        const controlsBarPlayButton = new ImageButton('Play', sprite, {x: 0, y: 16, height: 16, width: 16});
         controlsBar.addChild(controlsBarPlayButton);
 
-        const controlsBarStopButton = new Button('Stop');
+        const controlsBarStopButton = new ImageButton('Stop', sprite, {x: 16, y: 16, height: 16, width: 16});
         controlsBar.addChild(controlsBarStopButton);
 
-        const controlsBarRecordButton = new Button('Rec');
+        const controlsBarRecordButton = new ImageButton('Rec', sprite, {x: 32, y: 16, height: 16, width: 16});
         controlsBar.addChild(controlsBarRecordButton);
 
-        const controlsBarLoopButton = new Button('Loop');
+        const controlsBarLoopButton = new ImageButton('Loop', sprite, {x: 48, y: 16, height: 16, width: 16});
         controlsBar.addChild(controlsBarLoopButton);
 
-
-
-
-        const controlsBarMachinesButton = new Button('Machines');
-        controlsBarMachinesButton.active = (state.view === View.Machine);
-        controlsBarMachinesButton.addEventListener('mouseup', (event: Event) => {
-            state.view = View.Machine;
-        });
-        controlsBar.addChild(controlsBarMachinesButton);
-
-        const controlsBarSequencerButton = new Button('Sequencer');
-        controlsBarSequencerButton.active = (state.view === View.Sequence);
-        controlsBarSequencerButton.addEventListener('mouseup', (event: Event) => {
-            state.view = View.Sequence;
-        });
-        controlsBar.addChild(controlsBarSequencerButton);
-
-        const controlsBarPatternEditorButton = new Button('Pattern Editor');
+        const controlsBarPatternEditorButton = new ImageButton('Pattern Editor', sprite, {x: 16, y: 0, height: 16, width: 16});
         controlsBarPatternEditorButton.active = (state.view === View.Pattern);
         controlsBarPatternEditorButton.addEventListener('mouseup', (event: Event) => {
             state.view = View.Pattern;
         });
         controlsBar.addChild(controlsBarPatternEditorButton);
 
+        const controlsBarMachinesButton = new ImageButton('Machines', sprite, {x: 32, y: 0, height: 16, width: 16});
+        controlsBarMachinesButton.active = (state.view === View.Machine);
+        controlsBarMachinesButton.addEventListener('mouseup', (event: Event) => {
+            state.view = View.Machine;
+        });
+        controlsBar.addChild(controlsBarMachinesButton);
 
+        const controlsBarSequencerButton = new ImageButton('Sequencer', sprite, {x: 0, y: 0, height: 16, width: 16});
+        controlsBarSequencerButton.active = (state.view === View.Sequence);
+        controlsBarSequencerButton.addEventListener('mouseup', (event: Event) => {
+            state.view = View.Sequence;
+        });
+        controlsBar.addChild(controlsBarSequencerButton);
 
-
+        //Divider
         const controlsBarDivider = new Divider();
         applicationHeader.addChild(controlsBarDivider);
-
+        //
         // Properties Bar
         const propertiesBar = new Bar();
         applicationHeader.addChild(propertiesBar);
@@ -178,7 +178,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const propertiesBarLoopText = new Text('Loop 00:00:00:0');
         propertiesBar.addChild(propertiesBarLoopText);
-
+        //
         if(state.view === View.Machine) {
             // Machine Editor
             const machineEditor = new MachineEditor();
@@ -196,13 +196,38 @@ document.addEventListener('DOMContentLoaded', () => {
             sequenceEditor.height = document.body.clientHeight - applicationHeader.height - 20;
             application.addChild(sequenceEditor);
         }
-
-        //Footer
+        // //
+        // //Footer
         const applicationFooter = new Footer();
         application.addChild(applicationFooter);
 
         // - - - - - -
         application.draw(0, 0);
+
+
+
+        // let counter: number = 0;
+        // const queue = new Queue();
+        //
+        // queue.enqueue(application);
+        // while (!queue.isEmpty()) {
+        //     let current: Node = queue.dequeue();
+        //
+        //
+        //     current.children.forEach(child => {
+        //         queue.enqueue(child);
+        //     });
+        //     counter++;
+        // }
+        //
+        // console.log(counter);
+
+
+
+
+
+
+
     };
     window.requestAnimationFrame(runDraw);
 
@@ -210,17 +235,28 @@ document.addEventListener('DOMContentLoaded', () => {
 
     canvas.addEventListener('contextmenu', event => {
         event.preventDefault();
+        checkEvents(event, 'contextmenu', application);
         return false;
     });
 
     canvas.addEventListener('mousedown', event => {
-        checkEvents(event, 'mousedown', application);
+        event.preventDefault();
+        if(event.button === 0) {
+            checkEvents(event, 'mousedown', application);
+        }
+        return false;
     });
     canvas.addEventListener('mousemove', event => {
+        event.preventDefault();
         checkEvents(event, 'mousemove', application);
+        return false;
     });
     canvas.addEventListener('mouseup', event => {
-        checkEvents(event, 'mouseup', application);
+        event.preventDefault();
+        if(event.button === 0) {
+            checkEvents(event, 'mouseup', application);
+        }
+        return false;
     });
     document.body.addEventListener('keyup', event => {
 
