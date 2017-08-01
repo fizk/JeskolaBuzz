@@ -1,4 +1,5 @@
 import Node from '../elements/Node';
+import ModuleNode from '../elements/ModuleNode';
 import Window from '../components/Window';
 import Header from '../components/Header'
 import Slider from '../components/Slider';
@@ -8,10 +9,10 @@ import {Module} from "../types/Module";
 import MenuItem from '../elements/MenuItem';
 import Divider from "../elements/Divider";
 import {ModuleType} from '../types/ModuleType';
+import {COLOR} from "../types/COLOR";
 
 
 export default class MachineEditor extends Node {
-    contextMenu: Node;
 
     constructor() {
         super();
@@ -19,23 +20,25 @@ export default class MachineEditor extends Node {
         this.handleMouseDown = this.handleMouseDown.bind(this);
         this.handleMouseMove = this.handleMouseMove.bind(this);
         this.handleMouseUp = this.handleMouseUp.bind(this);
+        this.handleContextMenu = this.handleContextMenu.bind(this);
 
         this.addEventListener('mousedown', this.handleMouseDown);
         this.addEventListener('mousemove', this.handleMouseMove);
         this.addEventListener('mouseup', this.handleMouseUp);
+        this.addEventListener('contextmenu', this.handleContextMenu);
+    }
+
+    handleContextMenu(event: Event) {
+        this.state.contextMenus.set('machine-editor-context-menu', {x: event.offsetX, y: event.offsetY});
     }
 
     handleMouseDown(event: Event) {
         this.state.selectedModule = this.isCollision({x: event.offsetX, y: event.offsetY});
 
-        if(this.state.selectedModule) {
-            if(event.shiftKey === true) {
-                this.state.tempConnection = {
-                    from: {x: event.offsetX, y: event.offsetY},
-                    to: {x: event.offsetX, y: event.offsetY},
-                }
-            } else if (event.ctrlKey === true) {
-
+        if(this.state.selectedModule && event.shiftKey === true) {
+            this.state.tempConnection = {
+                from: {x: event.offsetX, y: event.offsetY},
+                to: {x: event.offsetX, y: event.offsetY},
             }
         }
     }
@@ -50,31 +53,19 @@ export default class MachineEditor extends Node {
 
     handleMouseUp(event: Event) {
         if(this.state.selectedModule) {
-
             if (this.state.tempConnection.from && this.state.tempConnection.to) {
                 const key = this.isCollision({x: event.offsetX, y: event.offsetY});
                 if(key && this.state.modules.get(key).type !== ModuleType.GEN) {
                     this.state.modules.get(this.state.selectedModule).ref.push(key);
                 }
             }
-
-        } else if (!this.state.selectedModule) {
-            if(event.shiftKey === true) {
-
-            } else if (event.ctrlKey === true) {
-                this.state.machineContextMenu = {x: event.offsetX, y: event.offsetY};
-            } else {
-
-            }
-
-
         }
         this.state.tempConnection = {
             from: undefined,
             to: undefined,
         };
         this.state.selectedModule = undefined;
-
+        this.state.contextMenus.delete('machine-editor-context-menu');
     }
 
     isCollision(point: Point) {
@@ -122,39 +113,41 @@ export default class MachineEditor extends Node {
     }
 
     drawModules() {
-        this.state.modules.forEach((module, key) => {
+        this.state.modules.forEach((module: Module, key: number) => {
             this.context.save();
             this.context.translate(module.position.x, module.position.y);
-            this.drawModule(module.type, module.label);
+            const moduleNode: ModuleNode = new ModuleNode(module, module.position);
+            moduleNode.addEventListener('contextmenu', (event: Event) => {
+                this.state.moduleContextMenu = {
+                    position: {x: module.position.x, y: module.position.y},
+                    module: module
+                }
+            });
+            moduleNode.absolute = true;
+            this.addChild(moduleNode);
             this.context.restore();
         });
     }
 
-    drawModule(type, label) {
+    drawBackground() {
         this.context.save();
+        this.context.fillStyle = COLOR.PANEL;
+        this.context.fillRect(0, 0, this.width, this.height);
 
-        const types = {
-            [ModuleType.MASTER]: '#c6bdab',
-            [ModuleType.GEN]: '#a8adcb',
-            [ModuleType.FX]: '#c5ada9',
-        };
-
-        this.context.fillStyle = 'black';
-        this.context.fillRect(0, 0, 100, 50);
-
-        this.context.fillStyle = types[type];
-        this.context.fillRect(1, 1, 98, 48);
-
-        this.context.fillStyle = 'black';
-        this.context.fillText(label, 50-(this.context.measureText(label).width/2), 25);
+        this.context.fillStyle = COLOR.STAGE;
+        this.context.fillRect(4, 4, this.width-4, this.height-4);
 
         this.context.restore();
-    };
+    }
 
     draw(x: number = 0, y: number = 0): void {
+
+
         this.context.save();
-        this.context.fillStyle = '#dad6c9';
-        this.context.fillRect(0, 0, this.width, this.height);
+
+        this.drawBackground();
+
+
         this.drawBorder({x: 4, y:4, width: this.width-4, height: this.height-4}, true);
         this.context.translate(5, 5);
 
@@ -162,8 +155,9 @@ export default class MachineEditor extends Node {
         this.drawTempConnection();
         this.drawModules();
 
-        if (this.state.machineContextMenu) {
-            const contextMenu = new Window(this.state.machineContextMenu);
+        if (this.state.contextMenus.has('machine-editor-context-menu')) {
+
+            const contextMenu = new Window(this.state.contextMenus.get('machine-editor-context-menu'));
             contextMenu.absolute = true;
 
             const synthesizerMenuItem = new MenuItem('Synthesizer');
@@ -172,7 +166,7 @@ export default class MachineEditor extends Node {
                 const moduleKey: number = Math.floor(Math.random() * 10000);
                 this.state.modules.set(moduleKey, {
                     key: moduleKey,
-                    position: {x: this.state.machineContextMenu.x, y: this.state.machineContextMenu.y},
+                    position: this.state.contextMenus.get('machine-editor-context-menu'),
                     type: ModuleType.GEN,
                     label: 'Bass3',
                     ref: [],
@@ -197,10 +191,9 @@ export default class MachineEditor extends Node {
                     this.state.sequence.push([patternKey]);
                 } else {
                     this.state.sequence[this.state.sequenceNumber].push(patternKey);
-                    // this.state.sequence[Math.floor(Math.random() * this.state.sequence.length-1) + 1 ].push(patternKey)
                 }
 
-                this.state.machineContextMenu = undefined;
+                this.state.contextMenus.delete('machine-editor-context-menu');
             });
 
             const drumMachineMenuItem = new MenuItem('Drum Machine');
@@ -208,37 +201,23 @@ export default class MachineEditor extends Node {
                 const moduleKey: number = Math.floor(Math.random() * 10000);
                 this.state.modules.set(moduleKey, {
                     key: moduleKey,
-                    position: {x: this.state.machineContextMenu.x, y: this.state.machineContextMenu.y},
+                    position: this.state.contextMenus.get('machine-editor-context-menu'),
                     type: ModuleType.GEN,
                     label: 'Kick',
                     ref: [],
                     asdr: {a: 0.03, s:0.8, d:0, r:0}
                 });
-                this.state.machineContextMenu = undefined;
+                this.state.contextMenus.delete('machine-editor-context-menu');
             });
 
             const delayMenuItem = new MenuItem('Delay');
             delayMenuItem.addEventListener('mouseup', (event: Event) => {
-                // this.state.modules[new Date().getTime()] = {
-                //     position: {x: this.state.machineContextMenu.x, y: this.state.machineContextMenu.y},
-                //     type: ModuleType.FX,
-                //     label: 'Delay',
-                //     ref: [],
-                //     asdr: {a: 0.1, s:0.2, d:0, r:0}
-                // };
-                // this.state.machineContextMenu = undefined;
+                this.state.contextMenus.delete('machine-editor-context-menu');
             });
 
             const reverbMenuItem = new MenuItem('Reverb');
             reverbMenuItem.addEventListener('mouseup', (event: Event) => {
-                // this.state.modules[new Date().getTime()] = {
-                //     position: {x: this.state.machineContextMenu.x, y: this.state.machineContextMenu.y},
-                //     type: ModuleType.FX,
-                //     label: 'Reverb',
-                //     ref: [],
-                //     asdr: {a: 0.1, s:0.2, d:0, r:0}
-                // };
-                // this.state.machineContextMenu = undefined;
+                this.state.contextMenus.delete('machine-editor-context-menu');
             });
 
             const divider = new Divider();
@@ -250,14 +229,25 @@ export default class MachineEditor extends Node {
             contextMenu.addChild(delayMenuItem);
             contextMenu.addChild(reverbMenuItem);
 
-            // contextMenu.addChild(new Slider({label: 'Attack', value: 20, min: 0, max: 100}));
-            // contextMenu.addChild(new Slider({label: 'Decay', value: 10, min: 0, max: 100}));
-            // contextMenu.addChild(new Slider({label: 'Sustain', value: 40, min: 0, max: 100}));
-            // contextMenu.addChild(new Slider({label: 'Release', value: 70, min: 0, max: 100}));
 
             this.addChild(contextMenu);
-            this.contextMenu = contextMenu;
         }
+
+        if (this.state.moduleContextMenu) {
+            const contextMenu = new Window(this.state.moduleContextMenu.position);
+            contextMenu.absolute = true;
+
+            const header: Header = new Header('ADSR');
+            contextMenu.addChild(header);
+            contextMenu.addChild(new Slider({label: 'Attack', value: this.state.moduleContextMenu.module.asdr.a, min: 0, max: 1}));
+            contextMenu.addChild(new Slider({label: 'Decay', value: this.state.moduleContextMenu.module.asdr.d, min: 0, max: 1}));
+            contextMenu.addChild(new Slider({label: 'Sustain', value: this.state.moduleContextMenu.module.asdr.s, min: 0, max: 1}));
+            contextMenu.addChild(new Slider({label: 'Release', value: this.state.moduleContextMenu.module.asdr.r, min: 0, max: 1}));
+
+            this.addChild(contextMenu);
+        }
+
+
 
         super.draw(x+5, y+5);
 

@@ -15,6 +15,7 @@ export default (event: MouseEvent, type: string, application: Application) => {
             (current.dimensions.x < event.clientX && current.dimensions.width+current.dimensions.x> event.clientX ) &&
             (current.dimensions.y < event.clientY && (current.dimensions.height+current.dimensions.y) > event.clientY)
         ) {
+
             if (current.events[type].length > 0) {
                 e = {
                     type: type,
@@ -32,7 +33,6 @@ export default (event: MouseEvent, type: string, application: Application) => {
             queue.enqueue(child);
         });
     }
-
     callbackArray.forEach(cb => {
         cb(e);
     })

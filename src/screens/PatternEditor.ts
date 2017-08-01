@@ -6,6 +6,7 @@ import {KeyEvent} from "../types/KeyEvent";
 import LetterMap from "../types/LetterMap";
 import {View} from "../types/View";
 import {Pattern} from "../types/Pattern";
+import {Point} from "../types/Point";
 
 export default class PatternEditor extends Node {
 
@@ -70,31 +71,43 @@ export default class PatternEditor extends Node {
         this.context.restore();
     }
 
+    getHeaderRow(): PatternRow {
+        const headRow: PatternRow = new PatternRow();
+        const headCountColumn: PatternColumnCount = new PatternColumnCount('');
+        const headNoteColumn: PatternColumn = new PatternColumn('');
+        headRow.setChildren([headCountColumn, headNoteColumn]);
+
+        return headRow;
+    }
+
+    getPatternRows(pattern: Pattern, position: Point): PatternRow[] {
+        return pattern.pattern.map((note, index) => {
+            const row: PatternRow = new PatternRow();
+            const countColumn: PatternColumnCount = new PatternColumnCount(index);
+            const noteColumn: PatternColumn = new PatternColumn(note || '...');
+            noteColumn.hightlight = !(index % 4);
+            noteColumn.isSelected = (index === position.y);
+            row.setChildren([countColumn, noteColumn]);
+            return row;
+        });
+    }
+
     draw(x: number = 0, y: number = 0): void {
-        this.context.save();
+        this.setChild(this.getHeaderRow());
 
         if(this.state.patterns.has(this.state.pattenEditorPattern)) {
-            const pattern: Pattern = this.state.patterns.get(this.state.pattenEditorPattern);
-            pattern.pattern.forEach((note, index) => {
-                const row: PatternRow = new PatternRow();
-                this.addChild(row);
-
-                const countColumn: PatternColumnCount = new PatternColumnCount(index);
-                row.addChild(countColumn);
-
-                const noteColumn: PatternColumn = new PatternColumn(note || '...');
-                noteColumn.hightlight = !(index % 4);
-                noteColumn.isSelected = (index === this.state.patternEditorPosition.y);
-                row.addChild(noteColumn);
-            });
+            this.addChildren(this.getPatternRows(
+                this.state.patterns.get(this.state.pattenEditorPattern),
+                this.state.patternEditorPosition
+            ));
         }
 
         this.drawBackground(this.width, this.height);
         this.drawBorder({x: 4, y:4, width: this.width-4, height: this.height-4}, true);
 
+        this.context.save();
         this.context.translate(5, 5);
         super.draw(x+5, y+5);
-
         this.context.restore();
     }
 }

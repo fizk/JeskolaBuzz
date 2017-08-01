@@ -5,12 +5,15 @@ import {Module} from "./Module";
 
 export interface State {
     modules: Map<number, Module>,
-    selectedModule: string,
+    selectedModule: number,
     tempConnection: {
         from: Point;
         to: Point;
     },
-    machineContextMenu: Point;
+    moduleContextMenu: {
+        position: Point,
+        module: Module
+    };
     view: View;
     sequenceNumber: number,
     patterns: Map<number, Pattern>,
@@ -19,4 +22,5 @@ export interface State {
     patternEditorPosition: Point;
     pattenEditorGenerator: number;
     pattenEditorPattern: number;
+    contextMenus: Map<string, any>;
 }
